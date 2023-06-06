@@ -20,10 +20,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	ValidatorState_GetMinimumHeight_FullMethodName = "/validatorstate.ValidatorState/GetMinimumHeight"
-	ValidatorState_GetCurrentHeight_FullMethodName = "/validatorstate.ValidatorState/GetCurrentHeight"
-	ValidatorState_GetSubnetID_FullMethodName      = "/validatorstate.ValidatorState/GetSubnetID"
-	ValidatorState_GetValidatorSet_FullMethodName  = "/validatorstate.ValidatorState/GetValidatorSet"
+	ValidatorState_GetMinimumHeight_FullMethodName     = "/validatorstate.ValidatorState/GetMinimumHeight"
+	ValidatorState_GetCurrentHeight_FullMethodName     = "/validatorstate.ValidatorState/GetCurrentHeight"
+	ValidatorState_GetSubnetID_FullMethodName          = "/validatorstate.ValidatorState/GetSubnetID"
+	ValidatorState_GetValidatorSet_FullMethodName      = "/validatorstate.ValidatorState/GetValidatorSet"
+	ValidatorState_GetValidatorSetAgain_FullMethodName = "/validatorstate.ValidatorState/GetValidatorSetAgain"
 )
 
 // ValidatorStateClient is the client API for ValidatorState service.
@@ -40,6 +41,7 @@ type ValidatorStateClient interface {
 	// GetValidatorSet returns the weights of the nodeIDs for the provided
 	// subnet at the requested P-chain height.
 	GetValidatorSet(ctx context.Context, in *GetValidatorSetRequest, opts ...grpc.CallOption) (*GetValidatorSetResponse, error)
+	GetValidatorSetAgain(ctx context.Context, in *GetValidatorSetRequest, opts ...grpc.CallOption) (*GetValidatorSetResponse, error)
 }
 
 type validatorStateClient struct {
@@ -86,6 +88,15 @@ func (c *validatorStateClient) GetValidatorSet(ctx context.Context, in *GetValid
 	return out, nil
 }
 
+func (c *validatorStateClient) GetValidatorSetAgain(ctx context.Context, in *GetValidatorSetRequest, opts ...grpc.CallOption) (*GetValidatorSetResponse, error) {
+	out := new(GetValidatorSetResponse)
+	err := c.cc.Invoke(ctx, ValidatorState_GetValidatorSetAgain_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ValidatorStateServer is the server API for ValidatorState service.
 // All implementations must embed UnimplementedValidatorStateServer
 // for forward compatibility
@@ -100,6 +111,7 @@ type ValidatorStateServer interface {
 	// GetValidatorSet returns the weights of the nodeIDs for the provided
 	// subnet at the requested P-chain height.
 	GetValidatorSet(context.Context, *GetValidatorSetRequest) (*GetValidatorSetResponse, error)
+	GetValidatorSetAgain(context.Context, *GetValidatorSetRequest) (*GetValidatorSetResponse, error)
 	mustEmbedUnimplementedValidatorStateServer()
 }
 
@@ -118,6 +130,9 @@ func (UnimplementedValidatorStateServer) GetSubnetID(context.Context, *GetSubnet
 }
 func (UnimplementedValidatorStateServer) GetValidatorSet(context.Context, *GetValidatorSetRequest) (*GetValidatorSetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetValidatorSet not implemented")
+}
+func (UnimplementedValidatorStateServer) GetValidatorSetAgain(context.Context, *GetValidatorSetRequest) (*GetValidatorSetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetValidatorSetAgain not implemented")
 }
 func (UnimplementedValidatorStateServer) mustEmbedUnimplementedValidatorStateServer() {}
 
@@ -204,6 +219,24 @@ func _ValidatorState_GetValidatorSet_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ValidatorState_GetValidatorSetAgain_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetValidatorSetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ValidatorStateServer).GetValidatorSetAgain(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ValidatorState_GetValidatorSetAgain_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ValidatorStateServer).GetValidatorSetAgain(ctx, req.(*GetValidatorSetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ValidatorState_ServiceDesc is the grpc.ServiceDesc for ValidatorState service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -226,6 +259,10 @@ var ValidatorState_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetValidatorSet",
 			Handler:    _ValidatorState_GetValidatorSet_Handler,
+		},
+		{
+			MethodName: "GetValidatorSetAgain",
+			Handler:    _ValidatorState_GetValidatorSetAgain_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
