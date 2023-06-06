@@ -17,6 +17,7 @@ service ValidatorState {
   // GetValidatorSet returns the weights of the nodeIDs for the provided
   // subnet at the requested P-chain height.
   rpc GetValidatorSet(GetValidatorSetRequest) returns (GetValidatorSetResponse);
+  rpc GetValidatorSetAgain(GetValidatorSetRequest) returns (GetValidatorSetResponse);
 }
 
 message GetMinimumHeightResponse {
